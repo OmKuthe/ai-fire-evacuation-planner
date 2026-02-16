@@ -95,7 +95,7 @@ ai-fire-evacuation-planner/
 ## ▶️ Installation & Run
 
 ```bash
-git clone https://github.com/<your-username>/ai-fire-evacuation-planner.git
+git clone https://github.com/OmKuthe/ai-fire-evacuation-planner.git
 cd ai-fire-evacuation-planner
 
 python -m venv venv
