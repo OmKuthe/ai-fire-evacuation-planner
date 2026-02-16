@@ -32,37 +32,48 @@ class EvacuationPlanner:
         return path
 
     # -------- MAIN A* SEARCH --------
-    def find_path(self, start):
+    def find_path(self, start, target_exit=None):
+        if target_exit:
+            # Find path to specific exit
+            return self.find_path_to_exit(start, target_exit)
+        else:
+            # Find best path to any exit (original behavior)
+            return self.find_path_to_any_exit(start)
+    
+    def find_path_to_exit(self, start, target_exit):
+        open_set = []
+        heapq.heappush(open_set, (0, start))
+        
+        came_from = {}
+        g_score = {start: 0}
+        
+        while open_set:
+            _, current = heapq.heappop(open_set)
+            
+            if current == target_exit:
+                path = self.reconstruct(came_from, current)
+                return path, g_score[current]
+            
+            for neighbor in self.neighbors(current):
+                risk = self.risk_engine.risk_cost(*neighbor)
+                tentative = g_score[current] + risk
+                
+                if neighbor not in g_score or tentative < g_score[neighbor]:
+                    g_score[neighbor] = tentative
+                    priority = tentative + self.heuristic(neighbor, target_exit)
+                    heapq.heappush(open_set, (priority, neighbor))
+                    came_from[neighbor] = current
+        
+        return None, float('inf')
+    
+    def find_path_to_any_exit(self, start):
         best_path = None
         best_cost = float('inf')
-
+        
         for exit in self.env.exits:
-            open_set = []
-            heapq.heappush(open_set, (0, start))
-
-            came_from = {}
-            g_score = {start: 0}
-
-            while open_set:
-                _, current = heapq.heappop(open_set)
-
-                if current == exit:
-                    path = self.reconstruct(came_from, current)
-                    cost = g_score[current]
-
-                    if cost < best_cost:
-                        best_cost = cost
-                        best_path = path
-                    break
-
-                for neighbor in self.neighbors(current):
-                    risk = self.risk_engine.risk_cost(*neighbor)
-                    tentative = g_score[current] + risk
-
-                    if neighbor not in g_score or tentative < g_score[neighbor]:
-                        g_score[neighbor] = tentative
-                        priority = tentative + self.heuristic(neighbor, exit)
-                        heapq.heappush(open_set, (priority, neighbor))
-                        came_from[neighbor] = current
-
+            path, cost = self.find_path_to_exit(start, exit)
+            if path and cost < best_cost:
+                best_cost = cost
+                best_path = path
+        
         return best_path, best_cost

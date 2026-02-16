@@ -8,7 +8,8 @@ class ReasoningEngine:
         self.planner = EvacuationPlanner(env)
 
     def analyze_exit(self, start, exit):
-        path, cost = self.planner.find_path(start)
+        # Fix: Pass the specific exit to find_path
+        path, cost = self.planner.find_path(start, target_exit=exit)
         if path is None:
             return None
 
