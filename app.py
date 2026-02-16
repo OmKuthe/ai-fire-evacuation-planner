@@ -1,20 +1,23 @@
 from core.environment import Environment
-from core.rules import RiskEngine
+from core.planner import EvacuationPlanner
 
-env = Environment(6,6)
+env = Environment(8,8)
 
-env.add_fire(2,2)
-env.add_smoke(1,2)
-env.add_exit(0,5)
-env.add_person(5,0)
+env.add_fire(3,3)
+env.add_fire(3,4)
+env.add_smoke(2,3)
+
+env.add_exit(0,7)
+env.add_exit(7,7)
+
+env.add_person(7,0)
 
 env.display()
 
-print("\nRisk Map:\n")
+planner = EvacuationPlanner(env)
 
-risk = RiskEngine(env)
+start = env.people[0]
+path, cost = planner.find_path(start)
 
-for i in range(env.rows):
-    for j in range(env.cols):
-        print(f"{risk.risk_cost(i,j):3}", end=" ")
-    print()
+print("\nChosen Path:", path)
+print("Total Cost:", cost)
